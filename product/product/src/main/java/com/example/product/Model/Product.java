@@ -22,6 +22,9 @@ public class Product {
     @Column(nullable = false)
     private int stock;
 
+    private int averageRating;
+
+    private int productRating;
 
     public Long getId() {
         return id;
@@ -61,5 +64,21 @@ public class Product {
 
     public void setStock(int stock) {
         this.stock = stock;
+    }
+
+    public int getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(int averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public int getProductRating() {
+        return productRating;
+    }
+
+    public void setProductRating(int productRating) {
+        this.productRating = productRating;
     }
 }
