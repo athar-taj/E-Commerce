@@ -3,7 +3,10 @@ package com.example.rating.Service;
 import com.example.rating.Model.Rating;
 import com.example.rating.Model.Request.RatingRequest;
 import com.example.rating.Model.Response.CommonResponse;
+import com.example.rating.Producer.RatingProducer;
 import com.example.rating.Repository.RatingRepository;
+import org.apache.catalina.User;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,9 +21,21 @@ public class RatingServiceImple implements RatingService {
 
     @Autowired
     private RatingRepository ratingRepository;
+    @Autowired
+    private RatingProducer ratingProducer;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
 
     @Override
     public ResponseEntity<CommonResponse> addRating(RatingRequest request) {
+        List<Rating> UserRating = ratingRepository.findByUserId(request.getUserId());
+        for(Rating rating : UserRating){
+            if(rating.getProductId() == request.getProductId() && rating.getUserId() == request.getUserId()){
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new CommonResponse(HttpStatus.UNAUTHORIZED.value(), "You Already Rated This Product!", false));
+            }
+        }
+
         Rating rating = new Rating();
         rating.setProductId(request.getProductId());
         rating.setUserId(request.getUserId());
@@ -30,7 +45,7 @@ public class RatingServiceImple implements RatingService {
         rating.setTime(LocalDateTime.now());
 
         Rating savedRating = ratingRepository.save(rating);
-
+        ratingProducer.sendRatingBody(savedRating);
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CommonResponse(200, "Rating added successfully!", savedRating));
     }
@@ -101,4 +116,5 @@ public class RatingServiceImple implements RatingService {
                     .body(new CommonResponse(404, "Rating not found for ID: " + id, null));
         }
     }
+
 }

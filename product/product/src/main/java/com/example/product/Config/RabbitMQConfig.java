@@ -35,8 +35,8 @@ public class RabbitMQConfig {
     }
 
     @Bean
-    public TopicExchange exchange(){
-        return new TopicExchange(exchange,true,false);
+    public DirectExchange exchange(){
+        return new DirectExchange(exchange);
     }
 
     @Bean
@@ -75,4 +75,70 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
+
+    @Value("${rabbitmq.stock.queue.name}")
+    private String stockQueue;
+
+    @Value("${rabbitmq.stock.routing.key}")
+    private String stockRoutingKey;
+
+    @Value("${rabbitmq.stock.exchange}")
+    private String stockExchange;
+
+    @Bean
+    public Queue stockQueue() {
+        return new Queue(stockQueue, false);
+    }
+
+    @Bean
+    public DirectExchange stockExchange() {
+        return new DirectExchange(stockExchange);
+    }
+
+    @Bean
+    public Binding stockBinding(Queue stockQueue, DirectExchange stockExchange) {
+        return BindingBuilder.bind(stockQueue).to(stockExchange).with(stockRoutingKey);
+    }
+
+
+    @Bean
+    public Queue reduceStockQueue() {
+        return new Queue("reduce_stock_queue");
+    }
+
+    @Bean
+    public DirectExchange reduceStockExchange() {
+        return new DirectExchange("stock_exchange");
+    }
+
+    @Bean
+    public Binding reduceStockBinding() {
+        return BindingBuilder.bind(reduceStockQueue()).to(reduceStockExchange()).with("stock_reduce_key");
+    }
+
+
+    @Value("${rabbitmq.product.queue.name}")
+    private String productQueue;
+
+    @Value("${rabbitmq.product.queue.exchange}")
+    private String productExchange;
+
+    @Value("${rabbitmq.product.routing.key}")
+    private String productRoutingKey;
+
+
+    @Bean
+    public Queue productQueue(){
+        return new Queue(productQueue,true);
+    }
+    @Bean
+    public DirectExchange productExchange(){
+        return new DirectExchange(productExchange,true,false);
+    }
+    @Bean
+    public Binding productBinding(){
+        return BindingBuilder.bind(productQueue())
+                .to(productExchange())
+                .with(productRoutingKey);
+    }
 }

@@ -1,44 +1,64 @@
 package com.example.auth.Service;
 
+import com.example.auth.Model.Request.UserRequest;
+import com.example.auth.Model.Response.CommonResponse;
 import com.example.auth.Model.User;
 import com.example.auth.Repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+
 @Service
-public class UserServiceImple implements UserService{
+public class UserServiceImple implements UserService {
     @Autowired
     private UserRepository userRepository;
 
-
-    public String register(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return "Email already exists";
+    public ResponseEntity<CommonResponse> register(@Valid UserRequest userRequest) {
+        if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new CommonResponse(409, "Email already exists", null));
         }
-        user.setPassword(user.getPassword());
+        User user = new User();
+        user.setName(userRequest.getName());
+        user.setEmail(userRequest.getEmail());
+        user.setPassword(userRequest.getPassword());
+        user.setActive(Boolean.TRUE);
+        user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
-        return "User registered successfully";
+        return  ResponseEntity.status(HttpStatus.CREATED)
+                .body(new CommonResponse(201, "User registered successfully", user));
     }
 
-    public String login(User user) {
-        Optional<User> userOptional = userRepository.findByEmail(user.getEmail());
-        if (userOptional.isPresent()) {
-            User user1 = userOptional.get();
-            if (user1.getPassword().equals(user.getPassword())) {
-                return "Login successful!";
-            }
+    public ResponseEntity<CommonResponse> login(@Valid UserRequest userRequest) {
+        Optional<User> userOptional = userRepository.findByEmail(userRequest.getEmail());
+        if (userOptional.isPresent() && userOptional.get().getPassword().equals(userRequest.getPassword())) {
+            return  ResponseEntity.status(HttpStatus.OK)
+                    .body(new CommonResponse(200, "Login successful!", userOptional.get()));
         }
-        return "Invalid credentials";
+        return  ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(new CommonResponse(401, "Invalid credentials", null));
     }
 
-    public String forgotPassword(User user) {
-        Optional<User> userOptional = userRepository.findByEmail(user.getEmail());
+    public ResponseEntity<CommonResponse> forgotPassword(@Valid UserRequest userRequest) {
+        Optional<User> userOptional = userRepository.findByEmail(userRequest.getEmail());
         if (userOptional.isPresent()) {
-            userOptional.get().setPassword(user.getPassword());
-            userRepository.save(userOptional.get());
-            return "Password Updated for " + user.getEmail();
+            User user = userOptional.get();
+            user.setPassword(userRequest.getPassword());
+            userRepository.save(user);
+            return  ResponseEntity.status(HttpStatus.OK)
+                    .body(new CommonResponse(200, "Password updated for " + user.getEmail(), user));
         }
-        return "Email not found";
+        return  ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new CommonResponse(404, "Email not found", null));
+    }
+
+    @Override
+    public boolean isUserAvailable(Long userId) {
+        return userRepository.existsById(userId);
     }
 }

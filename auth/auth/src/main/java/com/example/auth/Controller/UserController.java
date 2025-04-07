@@ -1,5 +1,7 @@
 package com.example.auth.Controller;
 
+import com.example.auth.Model.Request.UserRequest;
+import com.example.auth.Model.Response.CommonResponse;
 import com.example.auth.Model.User;
 import com.example.auth.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,17 +18,22 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> register(@RequestBody User user) {
-        return ResponseEntity.ok(userService.register(user));
+    public ResponseEntity<CommonResponse> register(@RequestBody UserRequest user) {
+        return userService.register(user);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody User user) {
-        return ResponseEntity.ok(userService.login(user));
+    public ResponseEntity<CommonResponse> login(@RequestBody UserRequest user) {
+        return userService.login(user);
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<String> forgotPassword(@RequestBody User user) {
-        return ResponseEntity.ok(userService.forgotPassword(user));
+    public ResponseEntity<CommonResponse> forgotPassword(@RequestBody UserRequest user) {
+        return userService.forgotPassword(user);
+    }
+
+    @GetMapping("/available/{userId}")
+    public Boolean isAvailableUser(@PathVariable Long userId ){
+        return userService.isUserAvailable(userId);
     }
 }

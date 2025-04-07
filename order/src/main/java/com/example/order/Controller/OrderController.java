@@ -1,9 +1,12 @@
 package com.example.order.Controller;
 
 import com.example.order.Model.Order;
+import com.example.order.Model.Request.OrderRequest;
+import com.example.order.Model.Request.StockRequest;
 import com.example.order.Model.Response.CommonResponse;
 import com.example.order.Producer.OrderProducer;
 import com.example.order.Service.OrderService;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -19,32 +22,29 @@ public class OrderController {
     @Autowired
     private OrderProducer orderProducer;
     @Autowired
-    RestTemplate restTemplate;
+    RabbitTemplate rabbitTemplate;
 
     @PostMapping("/place")
-    public ResponseEntity<CommonResponse> placeOrder(@RequestBody Order order) {
-        Boolean isAvailable = restTemplate.getForObject(
-                "http://localhost:8082/api/products/check-stock/" + order.getProductId() + "/" + order.getQuantity(),
-                Boolean.class
-        );
+    public ResponseEntity<CommonResponse> placeOrder(@RequestBody OrderRequest orderRequest) {
+        StockRequest stockRequest = new StockRequest();
+        stockRequest.setProductId(orderRequest.getProductId());
+        stockRequest.setQuantity(orderRequest.getQuantity());
 
-        if (Boolean.TRUE.equals(isAvailable)) {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
+        Boolean isStockAvailable = (Boolean) rabbitTemplate.convertSendAndReceive(
+                "stock_exchange", "stock_routing_key", stockRequest);
 
-            HttpEntity<String> entity = new HttpEntity<>(null, headers);
-
-            ResponseEntity<CommonResponse> updateStock = restTemplate.exchange(
-                    "http://localhost:8082/api/products/update-stock/" + order.getProductId() + "/" + order.getQuantity(),
-                    HttpMethod.PATCH,
-                    entity,
-                    CommonResponse.class
-            );
-            return orderService.placeOrder(order);
-        } else {
+        if (Boolean.FALSE.equals(isStockAvailable)) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new CommonResponse(HttpStatus.BAD_REQUEST.value(), "Order failed: Product out of stock!", false));
+                    .body(new CommonResponse(HttpStatus.BAD_REQUEST.value(),
+                            "Product out of stock!", false));
         }
+        ResponseEntity<CommonResponse> response = orderService.placeOrder(orderRequest);
+
+        if (response.getStatusCode() == HttpStatus.CREATED) {
+            rabbitTemplate.convertAndSend("stock_exchange", "stock_reduce_key", stockRequest);
+        }
+
+        return response;
     }
 
     @PatchMapping("/update-status/{orderId}/{status}")

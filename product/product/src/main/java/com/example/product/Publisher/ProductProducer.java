@@ -1,15 +1,20 @@
 package com.example.product.Publisher;
 
 import com.example.product.Model.Product;
+import com.example.product.Repository.ProductRepository;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 
 @Service
 public class ProductProducer {
 
+    @Autowired
+    ProductRepository productRepository;
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
@@ -27,8 +32,9 @@ public class ProductProducer {
     @Value("${rabbitmq.json.routing.key}")
     private String jsonRoutingKey;
 
-    public void sendProductBody(Product product){
-        System.out.println("Product From API -> "+product.toString());
-        rabbitTemplate.convertAndSend(exchange,jsonRoutingKey,product);
+    public void sendProductBody(Long productId){
+        Optional<Product> product = productRepository.findById(productId);
+        rabbitTemplate.convertAndSend(exchange,jsonRoutingKey,product.get());
+        System.out.println("Product From API -> "+product.get());
     }
 }

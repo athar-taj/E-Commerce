@@ -1,11 +1,13 @@
 package com.example.order.Config;
 
+import com.example.order.Model.Request.StockRequest;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -134,4 +136,20 @@ public class RabbitMQConfig {
         return builder -> builder.modules(new JavaTimeModule());
     }
 
+
+
+    @Bean
+    public Queue reduceStockQueue() {
+        return new Queue("reduce_stock_queue");
+    }
+
+    @Bean
+    public DirectExchange reduceStockExchange() {
+        return new DirectExchange("stock_exchange");
+    }
+
+    @Bean
+    public Binding reduceStockBinding() {
+        return BindingBuilder.bind(reduceStockQueue()).to(reduceStockExchange()).with("stock_reduce_key");
+    }
 }

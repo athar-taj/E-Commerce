@@ -3,6 +3,8 @@ package com.example.product.Model;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Table(name = "products")
 public class Product {
@@ -14,17 +16,35 @@ public class Product {
     private String name;
 
     @Column(nullable = false)
-    private String description;
-
-    @Column(nullable = false)
-    private double price;
+    private int price;
 
     @Column(nullable = false)
     private int stock;
 
-    private int averageRating;
+    @Column(nullable = false)
+    private String category;
 
-    private int productRating;
+    private String brand;
+
+    @Column(length = 1000)
+    private String specifications;
+
+    @Column(length = 1000)
+    private String about;
+
+    private boolean isActive = true;
+
+    private double productRating;
+
+    private int totalRatings;
+
+    @Column(nullable = false)
+    private String imageUrl;
+
+    private int discount;
+
+    private LocalDateTime createdAt;
+
 
     public Long getId() {
         return id;
@@ -42,19 +62,11 @@ public class Product {
         this.name = name;
     }
 
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public double getPrice() {
+    public int getPrice() {
         return price;
     }
 
-    public void setPrice(double price) {
+    public void setPrice(int price) {
         this.price = price;
     }
 
@@ -66,19 +78,83 @@ public class Product {
         this.stock = stock;
     }
 
-    public int getAverageRating() {
-        return averageRating;
+    public String getCategory() {
+        return category;
     }
 
-    public void setAverageRating(int averageRating) {
-        this.averageRating = averageRating;
+    public void setCategory(String category) {
+        this.category = category;
     }
 
-    public int getProductRating() {
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getSpecifications() {
+        return specifications;
+    }
+
+    public void setSpecifications(String specifications) {
+        this.specifications = specifications;
+    }
+
+    public String getAbout() {
+        return about;
+    }
+
+    public void setAbout(String about) {
+        this.about = about;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public double getProductRating() {
         return productRating;
     }
 
-    public void setProductRating(int productRating) {
+    public void setProductRating(double productRating) {
         this.productRating = productRating;
+    }
+
+    public int getTotalRatings() {
+        return totalRatings;
+    }
+
+    public void setTotalRatings(int totalRatings) {
+        this.totalRatings = totalRatings;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
+
+    public void setImageUrl(String imageUrl) {
+        this.imageUrl = imageUrl;
+    }
+
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
     }
 }

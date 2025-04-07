@@ -18,6 +18,12 @@ public class Order {
     private String status;
     private String role;
     private LocalDateTime orderDate;
+    private String name;
+    private String phone;
+    private String address;
+    private String city;
+    private String state;
+    private String postalCode;
 
 
     public Long getId() {
@@ -76,6 +82,54 @@ public class Order {
         this.role = role;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getCity() {
+        return city;
+    }
+
+    public void setCity(String city) {
+        this.city = city;
+    }
+
+    public String getState() {
+        return state;
+    }
+
+    public void setState(String state) {
+        this.state = state;
+    }
+
+    public String getPostalCode() {
+        return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+        this.postalCode = postalCode;
+    }
+
     @Override
     public String toString() {
         return "Order{" +
@@ -86,6 +140,12 @@ public class Order {
                 ", status='" + status + '\'' +
                 ", role='" + role + '\'' +
                 ", orderDate=" + orderDate +
+                ", name='" + name + '\'' +
+                ", phone='" + phone + '\'' +
+                ", address='" + address + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", postalCode='" + postalCode + '\'' +
                 '}';
     }
 }
