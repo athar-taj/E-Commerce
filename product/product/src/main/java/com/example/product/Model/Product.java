@@ -1,5 +1,6 @@
 package com.example.product.Model;
 
+import com.example.product.Model.Enums.Variants;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
@@ -42,6 +43,11 @@ public class Product {
     private String imageUrl;
 
     private int discount;
+
+    private Boolean isVariant;
+
+    @Enumerated(EnumType.STRING)
+    private Variants variantType;
 
     private LocalDateTime createdAt;
 
@@ -156,5 +162,21 @@ public class Product {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Boolean getVariant() {
+        return isVariant;
+    }
+
+    public void setVariant(Boolean variant) {
+        isVariant = variant;
+    }
+
+    public Variants getVariantType() {
+        return variantType;
+    }
+
+    public void setVariantType(Variants variantType) {
+        this.variantType = variantType;
     }
 }

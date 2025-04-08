@@ -1,6 +1,6 @@
 package com.example.productDetails.Service;
 
-import com.example.productDetails.Model.CommonResponse;
+import com.example.productDetails.Model.Response.CommonResponse;
 import com.example.productDetails.Model.Request.ProductDetailsRequest;
 import org.springframework.http.ResponseEntity;
 

@@ -1,9 +1,8 @@
 package com.example.productDetails.Service;
 
-import com.example.productDetails.Model.CommonResponse;
+import com.example.productDetails.Model.Response.CommonResponse;
 import com.example.productDetails.Model.ProductDetails;
 import com.example.productDetails.Model.Request.ProductDetailsRequest;
-import com.example.productDetails.Model.Request.ProductSubDetailRequest;
 import com.example.productDetails.Repository.ProductDetailsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

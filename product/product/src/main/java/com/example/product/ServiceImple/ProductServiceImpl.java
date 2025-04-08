@@ -1,19 +1,23 @@
 package com.example.product.ServiceImple;
 
+import com.example.product.Consumer.CategoryCheckResponse;
+import com.example.product.Consumer.ProductConsumer;
 import com.example.product.Model.Product;
 import com.example.product.Model.ProductDetails;
+import com.example.product.Model.Request.CategoryCheckRequest;
 import com.example.product.Model.Request.ProductIdRequest;
 import com.example.product.Model.Request.ProductRequest;
 import com.example.product.Model.Response.CommonResponse;
-import com.example.product.Repository.CategoryRepository;
 import com.example.product.Repository.ProductRepository;
 import com.example.product.Service.OtherImpl.FileStorage;
 import com.example.product.Service.ProductService;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -27,29 +31,40 @@ public class ProductServiceImpl implements ProductService {
     @Autowired
     private ProductRepository productRepository;
     @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
     private RabbitTemplate rabbitTemplate;
+    @Autowired
+    private ProductConsumer productConsumer;
+    @Autowired
+    private RestTemplate restTemplate;
 
     public ResponseEntity<CommonResponse> addProduct(ProductRequest productRequest, MultipartFile file) {
         try {
             Product product = new Product();
-            if(productRepository.existsByName(productRequest.getName())){
+
+            if(productRepository.existsByNameIgnoreCase(productRequest.getName())) {
                 return ResponseEntity.status(HttpStatus.CONFLICT)
                         .body(new CommonResponse(409, "Product Name is already Taken !!", null));
             }
-            else {
-                product.setName(productRequest.getName());
+
+            String categoryName = productRequest.getCategory();
+            String url = "http://localhost:8088/api/categories/isAvailable/" + categoryName;
+
+            ResponseEntity<Boolean> categoryResponse = restTemplate.getForEntity(url, Boolean.class);
+            System.out.println(categoryResponse);
+            if (!Boolean.TRUE.equals(categoryResponse.getBody())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(new CommonResponse(404, "Category not found: " + categoryName, null));
             }
+
+//            CategoryCheckRequest request = new CategoryCheckRequest();
+//            request.setCategoryName(productRequest.getCategory());
+//            CategoryCheckResponse response = (CategoryCheckResponse) rabbitTemplate.convertSendAndReceive("category_exchange","category_routing_key",request);
+//            System.out.println(response);
+
+            product.setCategory(productRequest.getCategory());
+            product.setName(productRequest.getName());
             product.setPrice(productRequest.getPrice());
             product.setStock(productRequest.getStock());
-            if(categoryRepository.existsByName(productRequest.getCategory())){
-                product.setCategory(productRequest.getCategory());
-            }
-            else {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new CommonResponse(404, "Category Not Found !!", null));
-            }
             product.setBrand(productRequest.getBrand());
             product.setSpecifications(productRequest.getSpecifications());
             product.setAbout(productRequest.getAbout());
@@ -106,7 +121,7 @@ public class ProductServiceImpl implements ProductService {
         Product existingProduct = optionalProduct.get();
 
         if (!existingProduct.getName().equalsIgnoreCase(productRequest.getName()) &&
-                productRepository.existsByName(productRequest.getName())) {
+                productRepository.existsByNameIgnoreCase(productRequest.getName())) {
             return ResponseEntity.status(HttpStatus.CONFLICT)
                     .body(new CommonResponse(409, "Product name is already taken by another product !!", null));
         }
@@ -115,10 +130,10 @@ public class ProductServiceImpl implements ProductService {
         existingProduct.setPrice(productRequest.getPrice());
         existingProduct.setStock(productRequest.getStock());
 
-        if (!categoryRepository.existsByName(productRequest.getCategory())) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(new CommonResponse(404, "Category Not Found !!", null));
-        }
+//        if (!categoryRepository.existsByName(productRequest.getCategory())) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new CommonResponse(404, "Category Not Found !!", null));
+//        }
 
         existingProduct.setCategory(productRequest.getCategory());
         existingProduct.setBrand(productRequest.getBrand());

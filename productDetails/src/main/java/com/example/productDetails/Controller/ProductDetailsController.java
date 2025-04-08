@@ -1,6 +1,6 @@
 package com.example.productDetails.Controller;
 
-import com.example.productDetails.Model.CommonResponse;
+import com.example.productDetails.Model.Response.CommonResponse;
 import com.example.productDetails.Model.Request.ProductDetailsRequest;
 import com.example.productDetails.Service.ProductDetailsService;
 import org.springframework.beans.factory.annotation.Autowired;

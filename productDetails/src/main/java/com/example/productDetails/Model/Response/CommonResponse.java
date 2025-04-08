@@ -1,4 +1,4 @@
-package com.example.productDetails.Model;
+package com.example.productDetails.Model.Response;
 
 
 public class CommonResponse {

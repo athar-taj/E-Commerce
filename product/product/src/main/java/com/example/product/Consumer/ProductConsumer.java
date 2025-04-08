@@ -1,9 +1,12 @@
 package com.example.product.Consumer;
 
 import com.example.product.Model.Product;
+import com.example.product.Model.Request.CategoryCheckRequest;
 import com.example.product.Model.Request.StockRequest;
 import com.example.product.Repository.ProductRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,6 +21,10 @@ public class ProductConsumer {
 
     @Autowired
     ProductRepository productRepository;
+    @Autowired
+    RabbitTemplate rabbitTemplate;
+    @Autowired
+    ObjectMapper objectMapper;
 
     @RabbitListener(queues = "${rabbitmq.stock.queue.name}")
     public Boolean checkStock(StockRequest request) {

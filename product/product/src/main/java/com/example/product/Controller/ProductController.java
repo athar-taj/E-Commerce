@@ -53,7 +53,6 @@ public class ProductController {
         if (!violations.isEmpty()) {
             throw new ConstraintViolationException(violations);
         }
-
         return productService.addProduct(productRequest,image);
     }
 
