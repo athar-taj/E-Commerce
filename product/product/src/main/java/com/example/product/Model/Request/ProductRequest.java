@@ -27,6 +27,8 @@ public class ProductRequest {
     @Max(value = 100, message = "Discount cannot exceed 100")
     private int discount;
 
+    private Boolean isVariant;
+
 
     public @NotBlank(message = "Product name is required") String getName() {
         return name;
@@ -94,5 +96,13 @@ public class ProductRequest {
 
     public void setDiscount(@Min(value = 0, message = "Discount cannot be negative") @Max(value = 100, message = "Discount cannot exceed 100") int discount) {
         this.discount = discount;
+    }
+
+    public Boolean getVariant() {
+        return isVariant;
+    }
+
+    public void setIsVariant(Boolean variant) {
+        isVariant = variant;
     }
 }

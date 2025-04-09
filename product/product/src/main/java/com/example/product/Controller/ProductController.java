@@ -66,7 +66,7 @@ public class ProductController {
         return productService.getProductById(id);
     }
 
-    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse> updateProduct(@PathVariable Long id,
                                                         @RequestPart("product") @Valid String productRequestJson,
                                                         @RequestParam(value = "image", required = false) MultipartFile image)

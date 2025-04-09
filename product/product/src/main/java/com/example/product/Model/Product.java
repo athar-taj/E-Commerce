@@ -1,10 +1,12 @@
 package com.example.product.Model;
 
 import com.example.product.Model.Enums.Variants;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.Entity;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "products")
@@ -46,11 +48,11 @@ public class Product {
 
     private Boolean isVariant;
 
-    @Enumerated(EnumType.STRING)
-    private Variants variantType;
-
     private LocalDateTime createdAt;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Variant> variants;
 
     public Long getId() {
         return id;
@@ -168,15 +170,15 @@ public class Product {
         return isVariant;
     }
 
-    public void setVariant(Boolean variant) {
+    public void setIsVariant(Boolean variant) {
         isVariant = variant;
     }
 
-    public Variants getVariantType() {
-        return variantType;
+    public List<Variant> getVariants() {
+        return variants;
     }
 
-    public void setVariantType(Variants variantType) {
-        this.variantType = variantType;
+    public void setVariants(List<Variant> variants) {
+        this.variants = variants;
     }
 }

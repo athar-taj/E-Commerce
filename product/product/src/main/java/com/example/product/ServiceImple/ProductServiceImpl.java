@@ -74,6 +74,7 @@ public class ProductServiceImpl implements ProductService {
             product.setDiscount(productRequest.getDiscount());
             product.setCreatedAt(LocalDateTime.now());
             product.setActive(Boolean.TRUE);
+            product.setIsVariant(productRequest.getVariant());
 
             productRepository.save(product);
 
