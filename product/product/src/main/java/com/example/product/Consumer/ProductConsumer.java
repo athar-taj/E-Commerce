@@ -1,7 +1,6 @@
 package com.example.product.Consumer;
 
 import com.example.product.Model.Product;
-import com.example.product.Model.Request.CategoryCheckRequest;
 import com.example.product.Model.Request.StockRequest;
 import com.example.product.Repository.ProductRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;

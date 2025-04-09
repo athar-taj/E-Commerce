@@ -102,5 +102,15 @@ public class ProductController {
     public Boolean isProductAvailable(@PathVariable Long productId){
         return productService.isProductAvailable(productId);
     }
+
+    @GetMapping("/discount-upto/{discount}")
+    public ResponseEntity<CommonResponse> getProductDiscountUpto(@PathVariable int discount){
+        return productService.getProductsByMaxDiscount(discount);
+    }
+
+    @GetMapping("/suggest/{productId}")
+    public ResponseEntity<CommonResponse> getSuggestionProduct(@PathVariable Long productId){
+        return productService.suggestedProduct(productId);
+    }
 }
 

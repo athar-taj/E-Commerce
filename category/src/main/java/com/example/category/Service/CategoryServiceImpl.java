@@ -137,6 +137,7 @@ public class CategoryServiceImpl implements CategoryService {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CommonResponse(200, "Subcategories fetched successfully!", subCategories));
     }
+
     public ResponseEntity<CommonResponse> getAllParentCategories() {
         List<Category> parentCategories = categoryRepository.findByParentCategoryIsNull();
         return ResponseEntity.ok(new CommonResponse(200, "Parent categories fetched successfully", parentCategories));

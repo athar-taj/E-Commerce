@@ -99,4 +99,18 @@ public class Category {
     public void setSubCategories(List<Category> subCategories) {
         this.subCategories = subCategories;
     }
+
+    @Override
+    public String toString() {
+        return "Category{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", isActive=" + isActive +
+                ", createdAt=" + createdAt +
+                ", imageUrl='" + imageUrl + '\'' +
+                ", parentCategory=" + parentCategory +
+                ", subCategories=" + subCategories +
+                '}';
+    }
 }

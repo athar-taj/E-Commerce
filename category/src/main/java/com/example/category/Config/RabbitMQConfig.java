@@ -37,6 +37,31 @@ public class RabbitMQConfig {
     }
 
 
+    @Value("${rabbitmq.suggested.category.queue.name}")
+    private String suggestedCategoryQueue;
+
+    @Value("${rabbitmq.suggested.category.queue.exchange}")
+    private String suggestedCategoryExchange;
+
+    @Value("${rabbitmq.suggested.category.routing.key}")
+    private String suggestedCategoryRoutingKey;
+
+
+    @Bean
+    public Queue suggestedCategoryQueue(){
+        return new Queue(suggestedCategoryQueue,true);
+    }
+    @Bean
+    public DirectExchange suggestedCategoryExchange(){
+        return new DirectExchange(suggestedCategoryExchange,true,false);
+    }
+    @Bean
+    public Binding suggestedCategoryBinding(){
+        return BindingBuilder.bind(suggestedCategoryQueue())
+                .to(suggestedCategoryExchange())
+                .with(suggestedCategoryRoutingKey);
+    }
+
 
     @Bean
     public MessageConverter converter(){

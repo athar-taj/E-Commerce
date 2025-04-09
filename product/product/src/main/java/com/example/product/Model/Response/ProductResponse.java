@@ -6,7 +6,10 @@ public class ProductResponse {
     private String name;
     private int price;
     private String category;
+    private int discount;
+    private int discount_price;
     private String brand;
+    private int rating;
     private String imageUrl;
     private List<VariantResponse> variants;
 
@@ -25,6 +28,30 @@ public class ProductResponse {
 
     public void setPrice(int price) {
         this.price = price;
+    }
+
+    public int getDiscount() {
+        return discount;
+    }
+
+    public void setDiscount(int discount) {
+        this.discount = discount;
+    }
+
+    public int getRating() {
+        return rating;
+    }
+
+    public void setRating(int rating) {
+        this.rating = rating;
+    }
+
+    public int getDiscount_price() {
+        return discount_price;
+    }
+
+    public void setDiscount_price(int discount_price) {
+        this.discount_price = discount_price;
     }
 
     public String getCategory() {

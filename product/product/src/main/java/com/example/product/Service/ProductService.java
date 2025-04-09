@@ -16,4 +16,6 @@ public interface ProductService {
     boolean checkProductStock(long productId,int quantity);
     ResponseEntity<CommonResponse> updateProductStock(long productId,int quantity);
     boolean isProductAvailable(long productId);
+    ResponseEntity<CommonResponse> getProductsByMaxDiscount(int discount);
+    ResponseEntity<CommonResponse> suggestedProduct(Long id);
 }

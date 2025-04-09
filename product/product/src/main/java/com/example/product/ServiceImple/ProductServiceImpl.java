@@ -1,17 +1,13 @@
 package com.example.product.ServiceImple;
 
-import com.example.product.Consumer.CategoryCheckResponse;
 import com.example.product.Consumer.ProductConsumer;
 import com.example.product.Model.Product;
-import com.example.product.Model.ProductDetails;
-import com.example.product.Model.Request.CategoryCheckRequest;
-import com.example.product.Model.Request.ProductIdRequest;
 import com.example.product.Model.Request.ProductRequest;
 import com.example.product.Model.Response.CommonResponse;
+import com.example.product.Model.Response.ProductResponse;
 import com.example.product.Repository.ProductRepository;
 import com.example.product.Service.OtherImpl.FileStorage;
 import com.example.product.Service.ProductService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -22,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,20 +43,12 @@ public class ProductServiceImpl implements ProductService {
                         .body(new CommonResponse(409, "Product Name is already Taken !!", null));
             }
 
-            String categoryName = productRequest.getCategory();
-            String url = "http://localhost:8088/api/categories/isAvailable/" + categoryName;
-
-            ResponseEntity<Boolean> categoryResponse = restTemplate.getForEntity(url, Boolean.class);
-            System.out.println(categoryResponse);
-            if (!Boolean.TRUE.equals(categoryResponse.getBody())) {
+            Boolean response = (Boolean) rabbitTemplate.convertSendAndReceive("category_exchange","category_routing_key",productRequest.getCategory());
+            System.out.println(response);
+            if(Boolean.FALSE.equals(response)){
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(new CommonResponse(404, "Category not found: " + categoryName, null));
+                        .body(new CommonResponse(404, "Category not found: " + productRequest.getCategory(), null));
             }
-
-//            CategoryCheckRequest request = new CategoryCheckRequest();
-//            request.setCategoryName(productRequest.getCategory());
-//            CategoryCheckResponse response = (CategoryCheckResponse) rabbitTemplate.convertSendAndReceive("category_exchange","category_routing_key",request);
-//            System.out.println(response);
 
             product.setCategory(productRequest.getCategory());
             product.setName(productRequest.getName());
@@ -94,14 +83,8 @@ public class ProductServiceImpl implements ProductService {
 
     public ResponseEntity<CommonResponse> getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
-        ProductIdRequest productIdRequest = new ProductIdRequest();
-        productIdRequest.setProductId(id);
-
-        ProductDetails productDetails = (ProductDetails) rabbitTemplate.convertSendAndReceive(
-                "product_exchange", "product_details_routing_key", productIdRequest);
 
         if (product.isPresent()) {
-            System.out.println(productDetails);
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new CommonResponse(200, "Products List !!", product));
         }
@@ -185,4 +168,37 @@ public class ProductServiceImpl implements ProductService {
         return productRepository.existsById(productId);
     }
 
+    public ResponseEntity<CommonResponse> getProductsByMaxDiscount(int discount) {
+        List<Product> products = productRepository.findByDiscountProduct(discount);
+
+        List<ProductResponse> responseList = new ArrayList<>();
+        for (Product product : products) {
+            ProductResponse res = new ProductResponse();
+            res.setName(product.getName());
+            res.setPrice(product.getPrice());
+            res.setDiscount(product.getDiscount());
+            res.setImageUrl(product.getImageUrl());
+            res.setRating(product.getTotalRatings());
+
+            int discountedPrice = (int) product.getPrice() - (product.getPrice() * product.getDiscount() / 100);
+            res.setDiscount_price(discountedPrice);
+            responseList.add(res);
+        }
+
+        return ResponseEntity.ok(new CommonResponse(200, "Products with discount Up to " + discount + "% fetched", responseList));
+    }
+
+    public ResponseEntity<CommonResponse> suggestedProduct(Long id){
+        Optional<Product> product = productRepository.findById(id);
+        if (product.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonResponse(404, "Products Not Found !!", null));
+        }
+
+        rabbitTemplate.convertAndSend("product_suggestion_exchange","suggestion_routing_key",product.get().getCategory());
+
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new CommonResponse(200, "Category Sent !!", null));
+
+    }
 }
