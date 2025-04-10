@@ -7,6 +7,10 @@ public class OrderRequest {
     @NotNull(message = "Product ID is required")
     private Long productId;
 
+
+    @NotNull(message = "User ID is required")
+    private Long userId;
+
     @Min(value = 1, message = "Quantity must be at least 1")
     private int quantity;
 
@@ -40,6 +44,14 @@ public class OrderRequest {
 
     public void setProductId(Long productId) {
         this.productId = productId;
+    }
+
+    public @NotNull(message = "User ID is required") Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(@NotNull(message = "User ID is required") Long userId) {
+        this.userId = userId;
     }
 
     public int getQuantity() {

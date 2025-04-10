@@ -50,4 +50,30 @@ public class RabbitMQConfig {
         template.setMessageConverter(jsonMessageConverter());
         return template;
     }
+
+
+    @Value("${rabbitmq.cart.user.available.queue.name}")
+    private String userQueue;
+
+    @Value("${rabbitmq.cart.user.available.queue.exchange}")
+    private String userExchange;
+
+    @Value("${rabbitmq.cart.user.available.routing.key}")
+    private String userRoutingKey;
+
+
+    @Bean
+    public Queue userQueue(){
+        return new Queue(userQueue,true);
+    }
+    @Bean
+    public DirectExchange userExchange(){
+        return new DirectExchange(userExchange,true,false);
+    }
+    @Bean
+    public Binding userBinding(){
+        return BindingBuilder.bind(userQueue())
+                .to(userExchange())
+                .with(userRoutingKey);
+    }
 }

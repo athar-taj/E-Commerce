@@ -29,4 +29,5 @@ public class OrderConsumer {
         setProduct(product);
         System.out.println("Consume JSON -> " + product.toString());
     }
+
 }

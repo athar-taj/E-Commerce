@@ -175,4 +175,29 @@ public class RabbitMQConfig {
                 .with(productSuggestionRoutingKey);
     }
 
+    @Value("${rabbitmq.user.available.queue.name}")
+    private String userQueue;
+
+    @Value("${rabbitmq.user.available.queue.exchange}")
+    private String userExchange;
+
+    @Value("${rabbitmq.user.available.routing.key}")
+    private String userRoutingKey;
+
+
+    @Bean
+    public Queue userQueue(){
+        return new Queue(userQueue,true);
+    }
+    @Bean
+    public DirectExchange userExchange(){
+        return new DirectExchange(userExchange,true,false);
+    }
+    @Bean
+    public Binding userBinding(){
+        return BindingBuilder.bind(userQueue())
+                .to(userExchange())
+                .with(userRoutingKey);
+    }
+
 }

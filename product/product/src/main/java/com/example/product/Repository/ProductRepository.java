@@ -14,4 +14,6 @@ public interface ProductRepository extends JpaRepository<Product,Long> {
 
     @Query(nativeQuery = true,value = "SELECT * FROM ecommerce.products WHERE discount >= :discount")
     List<Product> findByDiscountProduct(@Param("discount") int discount);
+
+    Product findByCategory(String c);
 }

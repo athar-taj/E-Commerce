@@ -54,6 +54,10 @@ public class Product {
     @JsonIgnore
     private List<Variant> variants;
 
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private List<Wishlist> wishlist;
+
     public Long getId() {
         return id;
     }
@@ -180,5 +184,17 @@ public class Product {
 
     public void setVariants(List<Variant> variants) {
         this.variants = variants;
+    }
+
+    public void setVariant(Boolean variant) {
+        isVariant = variant;
+    }
+
+    public List<Wishlist> getWishlist() {
+        return wishlist;
+    }
+
+    public void setWishlist(List<Wishlist> wishlist) {
+        this.wishlist = wishlist;
     }
 }

@@ -30,12 +30,13 @@ public class CategoryConsumer {
     }
 
     @RabbitListener(queues = "${product_suggestion_queue}")
-    public void getCategory(String category){
+    public List<String> getCategory(String category){
         List<String> categoryList = new ArrayList<>();Optional<Category> existingCategory = categoryRepository.findByName(category);
         List<Category> subCategories = categoryRepository.findByParentCategory_Id(existingCategory.get().getId());
         for(Category i : subCategories ) {
             categoryList.add(i.getName());
         }
-        rabbitTemplate.convertAndSend("product_suggestion_exchange","category_suggestion_routing_key",categoryList);
+        categoryList.add(category);
+        return categoryList;
     }
 }

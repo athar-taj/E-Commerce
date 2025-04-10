@@ -1,13 +1,11 @@
 package com.example.order.Config;
 
-import com.example.order.Model.Request.StockRequest;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
@@ -137,7 +135,6 @@ public class RabbitMQConfig {
     }
 
 
-
     @Bean
     public Queue reduceStockQueue() {
         return new Queue("reduce_stock_queue");
@@ -151,5 +148,31 @@ public class RabbitMQConfig {
     @Bean
     public Binding reduceStockBinding() {
         return BindingBuilder.bind(reduceStockQueue()).to(reduceStockExchange()).with("stock_reduce_key");
+    }
+
+
+    @Value("${rabbitmq.cart.userId.queue.name}")
+    private String userQueue;
+
+    @Value("${rabbitmq.cart.userId.queue.exchange}")
+    private String userExchange;
+
+    @Value("${rabbitmq.cart.userId.routing.key}")
+    private String userRoutingKey;
+
+
+    @Bean
+    public Queue userQueue(){
+        return new Queue(userQueue,true);
+    }
+    @Bean
+    public DirectExchange userExchange(){
+        return new DirectExchange(userExchange,true,false);
+    }
+    @Bean
+    public Binding userBinding(){
+        return BindingBuilder.bind(userQueue())
+                .to(userExchange())
+                .with(userRoutingKey);
     }
 }

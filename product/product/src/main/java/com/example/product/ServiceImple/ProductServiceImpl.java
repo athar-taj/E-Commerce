@@ -77,16 +77,46 @@ public class ProductServiceImpl implements ProductService {
 
     public ResponseEntity<CommonResponse> getAllProducts() {
         List<Product> products = productRepository.findAll();
+
+        List<ProductResponse> responseList = new ArrayList<>();
+        for (Product product : products) {
+            ProductResponse res = new ProductResponse();
+            res.setCategory(product.getCategory());
+            res.setBrand(product.getBrand());
+            res.setName(product.getName());
+            res.setPrice(product.getPrice());
+            res.setDiscount(product.getDiscount());
+            res.setImageUrl(product.getImageUrl());
+            res.setRating(product.getTotalRatings());
+
+            int discountedPrice = (int) product.getPrice() - (product.getPrice() * product.getDiscount() / 100);
+            res.setDiscount_price(discountedPrice);
+            responseList.add(res);
+        }
+
         return ResponseEntity.status(HttpStatus.OK)
-                .body(new CommonResponse(200, "Products List !!", products));
+                .body(new CommonResponse(200, "Products List !!", responseList));
     }
 
     public ResponseEntity<CommonResponse> getProductById(Long id) {
         Optional<Product> product = productRepository.findById(id);
 
+
         if (product.isPresent()) {
+            Product data = product.get();
+            ProductResponse res = new ProductResponse();
+            res.setCategory(data.getCategory());
+            res.setBrand(data.getBrand());
+            res.setName(data.getName());
+            res.setPrice(data.getPrice());
+            res.setDiscount(data.getDiscount());
+            res.setImageUrl(data.getImageUrl());
+            res.setRating(data.getTotalRatings());
+
+            int discountedPrice = (int) data.getPrice() - (data.getPrice() * data.getDiscount() / 100);
+            res.setDiscount_price(discountedPrice);
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new CommonResponse(200, "Products List !!", product));
+                    .body(new CommonResponse(200, "Products List !!", res));
         }
         else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
@@ -195,10 +225,21 @@ public class ProductServiceImpl implements ProductService {
                     .body(new CommonResponse(404, "Products Not Found !!", null));
         }
 
-        rabbitTemplate.convertAndSend("product_suggestion_exchange","suggestion_routing_key",product.get().getCategory());
+        List<String> categoryList = (List<String>) rabbitTemplate.convertSendAndReceive("product_suggestion_exchange","suggestion_routing_key",product.get().getCategory());
 
-        return ResponseEntity.status(HttpStatus.OK)
-                .body(new CommonResponse(200, "Category Sent !!", null));
+        List<Product> suggestedProducts = new ArrayList<>();
+        List<Product> allProducts = productRepository.findAll();
 
+        System.out.println(categoryList);
+        for (Product p : allProducts) {
+            if (!p.getId().equals(id) && categoryList.contains(p.getCategory())) {
+                suggestedProducts.add(p);
+            }
+        }
+
+        return ResponseEntity.ok(
+                new CommonResponse(200, "Suggested products fetched", suggestedProducts
+                )
+        );
     }
 }

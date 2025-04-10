@@ -1,11 +1,13 @@
 package com.example.order.Controller;
 
 import com.example.order.Model.Order;
+import com.example.order.Model.Request.CartOrderRequest;
 import com.example.order.Model.Request.OrderRequest;
 import com.example.order.Model.Request.StockRequest;
 import com.example.order.Model.Response.CommonResponse;
 import com.example.order.Producer.OrderProducer;
 import com.example.order.Service.OrderService;
+import jakarta.validation.Valid;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -25,30 +27,22 @@ public class OrderController {
     RabbitTemplate rabbitTemplate;
 
     @PostMapping("/place")
-    public ResponseEntity<CommonResponse> placeOrder(@RequestBody OrderRequest orderRequest) {
-        StockRequest stockRequest = new StockRequest();
-        stockRequest.setProductId(orderRequest.getProductId());
-        stockRequest.setQuantity(orderRequest.getQuantity());
+    public ResponseEntity<CommonResponse> placeOrder(@RequestBody @Valid OrderRequest orderRequest) {
+        return orderService.placeOrder(orderRequest);
+    }
 
-        Boolean isStockAvailable = (Boolean) rabbitTemplate.convertSendAndReceive(
-                "stock_exchange", "stock_routing_key", stockRequest);
-
-        if (Boolean.FALSE.equals(isStockAvailable)) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new CommonResponse(HttpStatus.BAD_REQUEST.value(),
-                            "Product out of stock!", false));
-        }
-        ResponseEntity<CommonResponse> response = orderService.placeOrder(orderRequest);
-
-        if (response.getStatusCode() == HttpStatus.CREATED) {
-            rabbitTemplate.convertAndSend("stock_exchange", "stock_reduce_key", stockRequest);
-        }
-
-        return response;
+    @PostMapping("/cart/place")
+    public ResponseEntity<CommonResponse> placeCartOrder(@RequestBody @Valid CartOrderRequest orderRequest) {
+        return orderService.placeCartOrder(orderRequest);
     }
 
     @PatchMapping("/update-status/{orderId}/{status}")
     public ResponseEntity<CommonResponse> updateOrderStatus(@PathVariable("orderId") Long orderId,@PathVariable("status") String status){
         return orderService.updateStatus(orderId,status);
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<CommonResponse> getOrderByUserId(@PathVariable("userId") Long id){
+        return orderService.getOrderByUserId(id);
     }
 }

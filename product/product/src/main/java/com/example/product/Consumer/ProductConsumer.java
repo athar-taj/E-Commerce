@@ -51,4 +51,9 @@ public class ProductConsumer {
     public Boolean isProductAvailable(long productId) {
         return productRepository.existsById(productId);
     }
+
+    @RabbitListener(queues = "${rabbitmq.product.available.queue.name}")
+    public Boolean isProductAvailableForCart(long productId) {
+        return productRepository.existsById(productId);
+    }
 }

@@ -12,7 +12,21 @@ public class UserConsumer {
 
     @RabbitListener(queues = "${rabbitmq.user.queue.name}")
     public Boolean isUserAvailable(long userId) {
-        System.out.println("Checking user availability for: " + userId);
+        return userRepository.existsById(userId);
+    }
+
+    @RabbitListener(queues = "${rabbitmq.user.available.queue.name}")
+    public Boolean isUserAvailableForOrder(long userId) {
+        return userRepository.existsById(userId);
+    }
+
+    @RabbitListener(queues = "${rabbitmq.user.available.wishlist.queue.name}")
+    public Boolean isUserAvailableForWishlist(long userId) {
+        return userRepository.existsById(userId);
+    }
+
+    @RabbitListener(queues = "${rabbitmq.cart.user.available.queue.name}")
+    public Boolean isUserAvailableForCart(long userId) {
         return userRepository.existsById(userId);
     }
 }
