@@ -18,6 +18,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,56 +93,78 @@ public class OrderServiceImple implements OrderService {
     }
 
     public ResponseEntity<CommonResponse> placeCartOrder(CartOrderRequest orderRequest) {
+        Boolean isUserAvailable = (Boolean) rabbitTemplate.convertSendAndReceive(
+                "order_exchange", "user_logged_key", orderRequest.getUserId());
 
-        // sending user id to cart
-         List<Long> cartProductsId = (List<Long>) rabbitTemplate.convertSendAndReceive(
+        if (Boolean.FALSE.equals(isUserAvailable)) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new CommonResponse(HttpStatus.NOT_FOUND.value(), "User Not Found !!", false));
+        }
+
+        List<Long> cartProductIds = (List<Long>) rabbitTemplate.convertSendAndReceive(
                 "order_exchange", "cart_order_products_key", orderRequest.getUserId());
 
+        System.out.println(cartProductIds);
+        if (cartProductIds == null || cartProductIds.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new CommonResponse(HttpStatus.BAD_REQUEST.value(), "Cart is empty!", null));
+        }
 
-//        Boolean isUserAvailable = (Boolean) rabbitTemplate.convertSendAndReceive(
-//                "order_exchange", "user_logged_key", orderRequest.getUserId());
-//
-//        if (Boolean.FALSE.equals(isUserAvailable)) {
-//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
-//                    .body(new CommonResponse(HttpStatus.NOT_FOUND.value(),
-//                            "User Not Found !!", false));
-//        }
-//
-//        StockRequest stockRequest = new StockRequest();
-//        stockRequest.setProductId(orderRequest.getProductId());
-//        stockRequest.setQuantity(orderRequest.getQuantity());
-//
-//        Boolean isStockAvailable = (Boolean) rabbitTemplate.convertSendAndReceive(
-//                "stock_exchange", "stock_routing_key", stockRequest);
-//
-//        if (Boolean.FALSE.equals(isStockAvailable)) {
-//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-//                    .body(new CommonResponse(HttpStatus.BAD_REQUEST.value(),
-//                            "Product out of stock!", false));
-//        }
-//
-//        double discountedPrice = product.getPrice() - ((double) (product.getPrice() * product.getDiscount()) / 100);
-//
-//        Order order = new Order();
-//        order.setUserId(orderRequest.getUserId());
-//        order.setProductId(orderRequest.getProductId());
-//        order.setQuantity(orderRequest.getQuantity());
-//        order.setName(orderRequest.getName());
-//        order.setPhone(orderRequest.getPhone());
-//        order.setAddress(orderRequest.getAddress());
-//        order.setCity(orderRequest.getCity());
-//        order.setState(orderRequest.getState());
-//        order.setPostalCode(orderRequest.getPostalCode());
-//        order.setOrderDate(LocalDateTime.now());
-//        order.setStatus("PENDING");
-//        order.setTotalPrice(discountedPrice);
-//
-//        Order savedOrder = orderRepository.save(order);
-//        rabbitTemplate.convertAndSend("stock_exchange", "stock_reduce_key", stockRequest);
-//
-//        orderProducer.sendOrderHeaderBody(order);
-//
-//        orderConsumer.setProduct(null);
+        List<Order> savedOrders = new ArrayList<>();
+        List<Long> productUserId = new ArrayList<>();
+        productUserId.add(orderRequest.getUserId());
+
+        for (Long productId : cartProductIds) {
+            productUserId.add(productId);
+            int Quantity = (int) rabbitTemplate.convertSendAndReceive("product_exchange","get_quantity_by_product_id_key",productUserId);
+
+            System.out.println(Quantity);
+            rabbitTemplate.convertAndSend("order_exchange","cart_products_key",productId);
+
+            StockRequest stockRequest = new StockRequest();
+            stockRequest.setProductId(productId);
+            stockRequest.setQuantity(Quantity);
+
+            Boolean isStockAvailable = (Boolean) rabbitTemplate.convertSendAndReceive(
+                    "stock_exchange", "stock_routing_key", stockRequest);
+
+            if (Boolean.FALSE.equals(isStockAvailable)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(new CommonResponse(HttpStatus.BAD_REQUEST.value(), "Stock Not Sufficient For Product : " + productId, null));
+            }
+
+            double discountedPrice = OrderConsumer.discountedPrice;
+
+            Order order = new Order();
+            order.setUserId(orderRequest.getUserId());
+            order.setProductId(productId);
+            order.setQuantity(Quantity);
+            order.setName(orderRequest.getName());
+            order.setPhone(orderRequest.getPhone());
+            order.setAddress(orderRequest.getAddress());
+            order.setCity(orderRequest.getCity());
+            order.setState(orderRequest.getState());
+            order.setPostalCode(orderRequest.getPostalCode());
+            order.setOrderDate(LocalDateTime.now());
+            order.setStatus("SUCCESS");
+            order.setTotalPrice(discountedPrice);
+
+            Order savedOrder = orderRepository.save(order);
+            savedOrders.add(savedOrder);
+
+            rabbitTemplate.convertAndSend("stock_exchange", "stock_reduce_key", stockRequest);
+
+            orderProducer.sendOrderHeaderBody(savedOrder);
+
+            productUserId.remove(1);
+        }
+
+        if (savedOrders.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new CommonResponse(400, "No orders could be placed. Either out of stock or invalid items.", null));
+        }
+
+        rabbitTemplate.convertAndSend("product_exchange","clear_cart_key",orderRequest.getUserId());
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CommonResponse(201, "Order placed successfully!", null));

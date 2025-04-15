@@ -1,6 +1,5 @@
 package com.example.order.Consumer;
 
-import com.example.order.Model.Order;
 import com.example.order.Model.Product;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.stereotype.Service;
@@ -28,6 +27,15 @@ public class OrderConsumer {
     public void ProductConsumer(Product product){
         setProduct(product);
         System.out.println("Consume JSON -> " + product.toString());
+    }
+
+
+    public static int discountedPrice;
+
+    @RabbitListener(queues = {"get_product_id"})
+    public void ProductDiscountPriceConsumer(Product product){
+        discountedPrice = product.getPrice() - ((int) (product.getPrice() * product.getDiscount()) / 100);
+        System.out.println(discountedPrice);
     }
 
 }

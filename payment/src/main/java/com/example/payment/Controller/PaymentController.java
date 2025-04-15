@@ -7,14 +7,10 @@ import com.example.payment.Model.Response.CommonResponse;
 import com.example.payment.Service.PaymentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
-import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
-@Controller
+@RestController
 @RequestMapping(value = "/api/payment")
 public class PaymentController {
 
@@ -58,4 +54,8 @@ public class PaymentController {
         }
     }
 
+    @GetMapping("/test")
+    public String Testing(){
+        return "Hello Payment !!";
+    }
 }

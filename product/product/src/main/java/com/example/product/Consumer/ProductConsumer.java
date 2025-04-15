@@ -9,6 +9,10 @@ import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 @Service
 public class ProductConsumer {
 
@@ -55,5 +59,14 @@ public class ProductConsumer {
     @RabbitListener(queues = "${rabbitmq.product.available.queue.name}")
     public Boolean isProductAvailableForCart(long productId) {
         return productRepository.existsById(productId);
+    }
+
+    @RabbitListener(queues = "${rabbitmq.cart.product.list.queue.name}")
+    public void provideCartProductList(long productId){
+        System.out.println(productId);
+        Optional<Product> product = productRepository.findById(productId);
+        if(product.isPresent()){
+        rabbitTemplate.convertAndSend("product_exchange","get_by_id_product_key",product.get());
+        }
     }
 }

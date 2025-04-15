@@ -200,4 +200,28 @@ public class RabbitMQConfig {
                 .with(userRoutingKey);
     }
 
+    @Value("${rabbitmq.get.product.by.id.queue.name}")
+    private String productByIdQueue;
+
+    @Value("${rabbitmq.get.product.by.id.queue.exchange}")
+    private String productByIdExchange;
+
+    @Value("${rabbitmq.get.product.by.id.routing.key}")
+    private String productByIdKey;
+
+
+    @Bean
+    public Queue productByIdQueue(){
+        return new Queue(productByIdQueue,true);
+    }
+    @Bean
+    public DirectExchange productByIdExchange(){
+        return new DirectExchange(productByIdExchange,true,false);
+    }
+    @Bean
+    public Binding productByIdBinding(){
+        return BindingBuilder.bind(productByIdQueue())
+                .to(productByIdExchange())
+                .with(productByIdKey);
+    }
 }

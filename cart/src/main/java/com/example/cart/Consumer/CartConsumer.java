@@ -6,9 +6,11 @@ import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class CartConsumer {
@@ -30,5 +32,20 @@ public class CartConsumer {
         }
         System.out.println("Product Ids "+ productIds);
         return productIds;
+    }
+
+    @RabbitListener(queues = "quantity_queue")
+        public int ProvideQuantity(List<Long> dataList){
+            Long userId = dataList.get(0);
+            Long productId = dataList.get(1);
+
+            Optional<Cart> cart = cartRepository.findByUserIdAndProductId(userId,productId);
+            return cart.get().getQuantity();
+        }
+
+        @Transactional
+    @RabbitListener(queues = "clear_cart_product")
+    public void ClearCart(Long userId){
+      cartRepository.deleteByUserId(userId);
     }
 }

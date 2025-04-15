@@ -175,4 +175,56 @@ public class RabbitMQConfig {
                 .to(userExchange())
                 .with(userRoutingKey);
     }
+
+
+
+    @Value("${rabbitmq.quantity.queue.name}")
+    private String quantityQueue;
+
+    @Value("${rabbitmq.quantity.exchange}")
+    private String quantityExchange;
+
+    @Value("${rabbitmq.quantity.routing.key}")
+    private String quantityRoutingKey;
+
+
+    @Bean
+    public Queue quantityQueue(){
+        return new Queue(quantityQueue,true);
+    }
+    @Bean
+    public DirectExchange cartProductExchange(){
+        return new DirectExchange(quantityExchange,true,false);
+    }
+    @Bean
+    public Binding cartProductBinding(){
+        return BindingBuilder.bind(quantityQueue())
+                .to(cartProductExchange())
+                .with(quantityRoutingKey);
+    }
+
+    @Value("${rabbitmq.clear.cart.queue.name}")
+    private String clearCartQueue;
+
+    @Value("${rabbitmq.clear.cart.exchange}")
+    private String clearCartExchange;
+
+    @Value("${rabbitmq.clear.cart.routing.key}")
+    private String clearCartRoutingKey;
+
+
+    @Bean
+    public Queue clearCartQueue(){
+        return new Queue(clearCartQueue,true);
+    }
+    @Bean
+    public DirectExchange clearCartExchange(){
+        return new DirectExchange(clearCartExchange,true,false);
+    }
+    @Bean
+    public Binding clearCartBinding(){
+        return BindingBuilder.bind(clearCartQueue())
+                .to(clearCartExchange())
+                .with(clearCartRoutingKey);
+    }
 }

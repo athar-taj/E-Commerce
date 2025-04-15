@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.Set;
 
 @RestController
-@RequestMapping("/api/products")
+@RequestMapping("/api")
 public class ProductController {
 
     @Autowired
@@ -31,19 +31,19 @@ public class ProductController {
     @Autowired
     Validator validator;
 
-    @GetMapping("/publish")
+    @GetMapping("/products/publish")
     public ResponseEntity<String> sendProduct(@RequestParam("message") String msg){
         productProducer.sendProductParam(msg);
         return ResponseEntity.ok("Message sent to RabbitMQ...");
     }
 
-    @GetMapping("/publish/{productId}")
+    @GetMapping("/products/publish/{productId}")
     public ResponseEntity<String> sendProductBody(@PathVariable Long productId){
         productProducer.sendProductBody(productId);
         return ResponseEntity.ok("Product sent to RabbitMQ...");
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/products",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse> createProduct(@RequestPart("product") @Valid String ProductRequestJson,
                                                         @RequestParam("image") MultipartFile image) throws IOException, ConstraintViolationException {
         ObjectMapper objectMapper = new ObjectMapper();
@@ -56,17 +56,17 @@ public class ProductController {
         return productService.addProduct(productRequest,image);
     }
 
-    @GetMapping
+    @GetMapping(value = "/products")
     public ResponseEntity<CommonResponse> getAllProducts() {
         return productService.getAllProducts();
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/products/{id}")
     public ResponseEntity<CommonResponse> getProductById(@PathVariable Long id) {
         return productService.getProductById(id);
     }
 
-    @PatchMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PatchMapping(value = "/products/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<CommonResponse> updateProduct(@PathVariable Long id,
                                                         @RequestPart("product") @Valid String productRequestJson,
                                                         @RequestParam(value = "image", required = false) MultipartFile image)
@@ -83,32 +83,32 @@ public class ProductController {
         return productService.updateProduct(id, productRequest, image);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/products/{id}")
     public ResponseEntity<CommonResponse> deleteProduct(@PathVariable Long id) {
         return productService.deleteProduct(id);
     }
 
-    @GetMapping("/check-stock/{productId}/{quantity}")
+    @GetMapping("/products/check-stock/{productId}/{quantity}")
     public Boolean checkProductStock(@PathVariable Long productId, @PathVariable int quantity) {
         return productService.checkProductStock(productId, quantity);
     }
 
-    @PatchMapping("/update-stock/{productId}/{quantity}")
+    @PatchMapping("/products/update-stock/{productId}/{quantity}")
     public ResponseEntity<CommonResponse> updateProductStock(@PathVariable Long productId, @PathVariable int quantity) {
         return productService.updateProductStock(productId, quantity);
     }
 
-    @GetMapping("/available/{productId}")
+    @GetMapping("/products/available/{productId}")
     public Boolean isProductAvailable(@PathVariable Long productId){
         return productService.isProductAvailable(productId);
     }
 
-    @GetMapping("/discount-upto/{discount}")
+    @GetMapping("/products/discount-upto/{discount}")
     public ResponseEntity<CommonResponse> getProductDiscountUpto(@PathVariable int discount){
         return productService.getProductsByMaxDiscount(discount);
     }
 
-    @GetMapping("/suggest/{productId}")
+    @GetMapping("/products/suggest/{productId}")
     public ResponseEntity<CommonResponse> getSuggestionProduct(@PathVariable Long productId){
         return productService.suggestedProduct(productId);
     }

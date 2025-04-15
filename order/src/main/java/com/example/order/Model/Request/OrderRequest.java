@@ -7,7 +7,6 @@ public class OrderRequest {
     @NotNull(message = "Product ID is required")
     private Long productId;
 
-
     @NotNull(message = "User ID is required")
     private Long userId;
 
