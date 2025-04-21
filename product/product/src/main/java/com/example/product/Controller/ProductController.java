@@ -9,6 +9,9 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Set;
 
+@Slf4j
 @RestController
 @RequestMapping("/api")
 public class ProductController {
 
+    private static final Logger log = LoggerFactory.getLogger(ProductController.class);
     @Autowired
     private ProductService productService;
     @Autowired
@@ -30,6 +35,13 @@ public class ProductController {
     private ProductConsumer productConsumer;
     @Autowired
     Validator validator;
+
+    @GetMapping("/test")
+    public String testing(){
+        log.info("Testing Enable !!");
+        return "Tested !!";
+    }
+
 
     @GetMapping("/products/publish")
     public ResponseEntity<String> sendProduct(@RequestParam("message") String msg){

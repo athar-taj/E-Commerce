@@ -1,9 +1,11 @@
 package com.example.productDetails.Service;
 
+import com.example.productDetails.Model.Product;
 import com.example.productDetails.Model.Response.CommonResponse;
 import com.example.productDetails.Model.ProductDetails;
 import com.example.productDetails.Model.Request.ProductDetailsRequest;
 import com.example.productDetails.Repository.ProductDetailsRepository;
+import com.example.productDetails.Repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +17,8 @@ import java.util.Optional;
 public class ProductDetailsServiceImpl implements ProductDetailsService {
     @Autowired
     private ProductDetailsRepository productDetailsRepository;
+    @Autowired
+    private ProductRepository productRepository;
 
     public ResponseEntity<CommonResponse> saveProduct(ProductDetailsRequest request) {
         if (productDetailsRepository.findByProductId(request.getProductId()).isPresent()) {
@@ -55,4 +59,44 @@ public class ProductDetailsServiceImpl implements ProductDetailsService {
 
         return ResponseEntity.ok(new CommonResponse(200, "Product Details Updated Successfully", true));
     }
+
+
+    public ResponseEntity<CommonResponse> saveProductInElastic(ProductDetailsRequest request) {
+
+        Product product = new Product();
+        product.setProductId(request.getProductId());
+        product.setSubDetails(request.getSubDetails());
+
+        productRepository.save(product);
+
+        return ResponseEntity.ok(new CommonResponse(200, "Product Details Saved !!", true));
+    }
+//
+//    public ResponseEntity<CommonResponse> getProductByIdInElastic(String id) {
+//        Optional<Products> product = elasticRepository.findById(id);
+//        if (product.isPresent()) {
+//            return ResponseEntity.ok(new CommonResponse(200, "Product Details Fetched !!", product.get()));
+//        } else {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new CommonResponse(404, "Product Not Found !!", null));
+//        }
+//    }
+//
+//    public ResponseEntity<CommonResponse> updateProductInElastic(long productId, ProductDetailsRequest request) {
+//        Optional<Products> existing = elasticRepository.findByProductId(productId);
+//
+//        if (existing.isEmpty()) {
+//            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+//                    .body(new CommonResponse(404, "Product Not Found !!", false));
+//        }
+//
+//        Products product = existing.get();
+//        product.setSubDetails(request.getSubDetails());
+//        product.setProduct(request.getProduct());
+//
+//        elasticRepository.save(product);
+//
+//        return ResponseEntity.ok(new CommonResponse(200, "Product Details Updated Successfully", true));
+//    }
+
 }

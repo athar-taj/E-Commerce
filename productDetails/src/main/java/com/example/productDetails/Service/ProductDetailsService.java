@@ -8,4 +8,8 @@ public interface ProductDetailsService {
     ResponseEntity<CommonResponse> saveProduct(ProductDetailsRequest request);
     ResponseEntity<CommonResponse> getProductById(String id);
     ResponseEntity<CommonResponse> updateProduct(long productId, ProductDetailsRequest request);
+
+    ResponseEntity<CommonResponse> saveProductInElastic(ProductDetailsRequest request);
+//    ResponseEntity<CommonResponse> getProductByIdInElastic(String id);
+//    ResponseEntity<CommonResponse> updateProductInElastic(long productId, ProductDetailsRequest request);
 }

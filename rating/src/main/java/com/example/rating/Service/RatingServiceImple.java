@@ -5,7 +5,9 @@ import com.example.rating.Model.Request.RatingRequest;
 import com.example.rating.Model.Response.CommonResponse;
 import com.example.rating.Producer.RatingProducer;
 import com.example.rating.Repository.RatingRepository;
-import org.apache.catalina.User;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,9 +18,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class RatingServiceImple implements RatingService {
 
+    private static final Logger log = LoggerFactory.getLogger(RatingServiceImple.class);
     @Autowired
     private RatingRepository ratingRepository;
     @Autowired
@@ -46,6 +50,8 @@ public class RatingServiceImple implements RatingService {
 
         Rating savedRating = ratingRepository.save(rating);
         ratingProducer.sendRatingBody(savedRating);
+
+
         return ResponseEntity.status(HttpStatus.OK)
                 .body(new CommonResponse(200, "Rating added successfully!", savedRating));
     }
