@@ -81,7 +81,6 @@
 				<artifactId>spring-boot-starter-logging</artifactId>
 			</dependency>
 
-			<!-- Logback Encoder for JSON output (optional, for structured logging) -->
 			<dependency>
 				<groupId>net.logstash.logback</groupId>
 				<artifactId>logstash-logback-encoder</artifactId>
