@@ -1,13 +1,21 @@
 package com.example.auth.Controller;
 
+import com.example.auth.Config.JWTConfig;
 import com.example.auth.Model.Request.UserRequest;
 import com.example.auth.Model.Response.CommonResponse;
+import com.example.auth.Model.User;
+import com.example.auth.Repository.UserRepository;
 import com.example.auth.Service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Optional;
 
 
 @RestController
@@ -15,6 +23,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private AuthenticationManager authenticationManager;
+    @Autowired
+    private JWTConfig jwtConfig;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/signup")
     public ResponseEntity<CommonResponse> register(@RequestBody UserRequest user) {
@@ -22,14 +38,37 @@ public class UserController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<CommonResponse> login(@RequestBody UserRequest user) {
-        return userService.login(user);
+    public ResponseEntity<CommonResponse> login(@RequestBody UserRequest request) {
+        try {
+            authenticationManager.authenticate
+                    (new UsernamePasswordAuthenticationToken
+                            (request.getEmail(), request.getPassword()));
+            Optional<User> user = userRepository.findByEmail(request.getEmail());
+            if (user.isPresent()) {
+                String token = jwtConfig.generateToken(user.get().getEmail());
+                return ResponseEntity.ok(new CommonResponse(200, "Login successful!", token));
+            } else {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new CommonResponse(404, "Login failed! User not found !",null));
+            }
+        }catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new CommonResponse(500, "Login Failed!!",e.getMessage()));
+        }
     }
 
     @PostMapping("/forgot-password")
     public ResponseEntity<CommonResponse> forgotPassword(@RequestBody UserRequest user) {
         return userService.forgotPassword(user);
     }
+
+    @GetMapping("/verify-token")
+    public String verifyToken(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String token = authHeader.substring(7);
+            return jwtConfig.debugToken(token);
+        }
+        return "No token provided";
+    }
+
 
     @GetMapping("/available/{userId}")
     public Boolean isAvailableUser(@PathVariable Long userId ){

@@ -8,6 +8,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -17,6 +18,8 @@ import java.util.Optional;
 public class UserServiceImple implements UserService {
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public ResponseEntity<CommonResponse> register(@Valid UserRequest userRequest) {
         if (userRepository.findByEmail(userRequest.getEmail()).isPresent()) {
@@ -26,13 +29,14 @@ public class UserServiceImple implements UserService {
         User user = new User();
         user.setName(userRequest.getName());
         user.setEmail(userRequest.getEmail());
-        user.setPassword(userRequest.getPassword());
+        user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
         user.setActive(Boolean.TRUE);
         user.setCreatedAt(LocalDateTime.now());
         userRepository.save(user);
         return  ResponseEntity.status(HttpStatus.CREATED)
                 .body(new CommonResponse(201, "User registered successfully", user));
     }
+
 
     public ResponseEntity<CommonResponse> login(@Valid UserRequest userRequest) {
         Optional<User> userOptional = userRepository.findByEmail(userRequest.getEmail());
@@ -48,7 +52,7 @@ public class UserServiceImple implements UserService {
         Optional<User> userOptional = userRepository.findByEmail(userRequest.getEmail());
         if (userOptional.isPresent()) {
             User user = userOptional.get();
-            user.setPassword(userRequest.getPassword());
+            user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
             userRepository.save(user);
             return  ResponseEntity.status(HttpStatus.OK)
                     .body(new CommonResponse(200, "Password updated for " + user.getEmail(), user));
