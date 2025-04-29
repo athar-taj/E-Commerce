@@ -1,9 +1,10 @@
-package com.example.auth.Service;
+package com.example.auth.Service.Unit;
 
 import com.example.auth.Model.Request.UserRequest;
 import com.example.auth.Model.Response.CommonResponse;
 import com.example.auth.Model.User;
 import com.example.auth.Repository.UserRepository;
+import com.example.auth.Service.UserServiceImple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -18,7 +19,7 @@ import java.util.Optional;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-@ExtendWith(MockitoExtension.class)             // throws NullPointerException
+@ExtendWith(MockitoExtension.class)             // throws NullPointerException & Not load Application Context
 public class TestRegisterUser {
 
     @Mock
@@ -60,6 +61,4 @@ public class TestRegisterUser {
         assertEquals(409, response.getBody().getStatusCode());
         assertEquals("Email already exists", response.getBody().getMessage());
     }
-
-
 }

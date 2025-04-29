@@ -54,9 +54,8 @@ public class UserServiceImple implements UserService {
                     .body(new CommonResponse(200, "Password updated for " + user.getEmail(), user));
         }
         return  ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new CommonResponse(404, "Email not found", null));
+                .body(new CommonResponse(404, "Email not found!!", null));
     }
-
     @Override
     public boolean isUserAvailable(Long userId) {
         return userRepository.existsById(userId);

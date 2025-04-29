@@ -1,9 +1,11 @@
-package com.example.auth.Service;
+package com.example.auth.Service.Unit;
 
 import com.example.auth.Model.Request.UserRequest;
 import com.example.auth.Model.Response.CommonResponse;
 import com.example.auth.Model.User;
 import com.example.auth.Repository.UserRepository;
+import com.example.auth.Service.UserService;
+import com.example.auth.Service.UserServiceImple;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -12,6 +14,7 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
 
