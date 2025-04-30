@@ -36,7 +36,7 @@ public class JWTConfig {
                 .header().empty().add("typ","JWT")
                 .and()
                 .issuedAt(new Date(System.currentTimeMillis()))
-                .expiration(new Date(System.currentTimeMillis() + 1000 * 60)) // 1-minutes
+                .expiration(new Date(System.currentTimeMillis() + 1000 * 60 * 5)) // 5-minutes
                 .signWith(getSigningKey())
                 .compact();
     }
@@ -63,28 +63,24 @@ public class JWTConfig {
                 return null;
             }
 
-            return claims.getSubject(); // This should be the email
+            return claims.getSubject();
         } catch (Exception e) {
             return null;
         }
     }
 
-    public String debugToken(String token) {
+    public Boolean debugToken(String token) {
         try {
-
             JwtParser parser = Jwts.parser()
                     .verifyWith(Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8)))
                     .build();
 
             Claims claims = parser.parseSignedClaims(token).getPayload();
 
-
-            return "Token is valid!\n" +
-                    "Email: " + claims.getSubject() + "\n" +
-                    "Expiration: " + claims.getExpiration() + "\n" +
-                    "Issued At: " + claims.getIssuedAt();
+            return true;
         } catch (Exception e) {
-            return "Token validation failed: " + e.getMessage();
+            System.out.println("Token validation failed: " + e.getMessage());
+            return false;
         }
     }
 

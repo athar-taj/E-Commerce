@@ -33,12 +33,13 @@ public class TestForgotPassword {
         request.setEmail("hello@gmail.com");
 
         User user = new User();
-        request.setPassword("AWE895");
-        request.setEmail("hello@gmail.com");
+        user.setPassword("AWE895");
+        user.setEmail("hello@gmail.com");
 
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZWxsb0BnbWFpbC5jb20iLCJpYXQiOjE3NDYwMDk1MzYsImV4cCI6MTc0NjAwOTgzNn0.liZ--JryFroFc7KR0isXT61CcbQZsuGMOc9srGCfw8s";
         Mockito.when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.of(user));
 
-        ResponseEntity<CommonResponse> response = userService.forgotPassword(request);
+        ResponseEntity<CommonResponse> response = userService.forgotPassword(request,token);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertNotNull(response.getBody());
@@ -46,7 +47,6 @@ public class TestForgotPassword {
         assertEquals("Password updated for " + user.getEmail(), response.getBody().getMessage());
 
     }
-
     @Test
     public void test_emailNotFound(){
         UserRequest request = new UserRequest();
@@ -54,12 +54,13 @@ public class TestForgotPassword {
         request.setEmail("hello1@gmail.com");
 
         User user = new User();
-        request.setPassword("AWE895");
-        request.setEmail("hello1@gmail.com");
+        user.setPassword("AWE895");
+        user.setEmail("hello1@gmail.com");
+        String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJoZWxsb0BnbWFpbC5jb20iLCJpYXQiOjE3NDYwMDk1MzYsImV4cCI6MTc0NjAwOTgzNn0.liZ--JryFroFc7KR0isXT61CcbQZsuGMOc9srGCfw8s";
 
         Mockito.when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
-        ResponseEntity<CommonResponse> response = userService.forgotPassword(request);
+        ResponseEntity<CommonResponse> response = userService.forgotPassword(request,token);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals(404, response.getBody().getStatusCode());

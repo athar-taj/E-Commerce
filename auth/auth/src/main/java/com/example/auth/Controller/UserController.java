@@ -56,19 +56,15 @@ public class UserController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<CommonResponse> forgotPassword(@RequestBody UserRequest user) {
-        return userService.forgotPassword(user);
+    public ResponseEntity<CommonResponse> forgotPassword(@RequestBody UserRequest user,@RequestHeader("Authorization") String authHeader) {
+        System.out.println(authHeader + " " + user.getEmail() + " " + user.getPassword());
+        return userService.forgotPassword(user,authHeader);
     }
 
     @GetMapping("/verify-token")
-    public String verifyToken(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader != null && authHeader.startsWith("Bearer ")) {
-            String token = authHeader.substring(7);
-            return jwtConfig.debugToken(token);
-        }
-        return "No token provided";
+    public ResponseEntity<CommonResponse> verifyToken(@RequestHeader("Authorization") String authHeader) {
+        return userService.validateToken(authHeader);
     }
-
 
     @GetMapping("/available/{userId}")
     public Boolean isAvailableUser(@PathVariable Long userId ){
