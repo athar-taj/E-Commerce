@@ -1,6 +1,7 @@
 package com.example.product.Controller;
 
-import com.example.product.Consumer.ProductConsumer;import com.example.product.Model.Request.ProductRequest;
+import com.example.product.Consumer.ProductConsumer;
+import com.example.product.Model.Request.ProductRequest;
 import com.example.product.Model.Response.CommonResponse;
 import com.example.product.Publisher.ProductProducer;
 import com.example.product.Service.ProductService;
@@ -9,7 +10,8 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
 import jakarta.validation.Validator;
-import lombok.extern.slf4j.Slf4j;
+
+import org.ecom.auth.Service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,11 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.io.IOException;
 import java.util.Set;
 
-@Slf4j
 @RestController
 @RequestMapping("/api")
 public class ProductController {
@@ -35,13 +35,15 @@ public class ProductController {
     private ProductConsumer productConsumer;
     @Autowired
     Validator validator;
+    @Autowired
+    UserService userService;
 
     @GetMapping("/test")
-    public String testing(){
+    public String testing(@RequestHeader("Authorization") String token){
         log.info("Testing Enable !!");
-        return "Tested !!";
-    }
 
+        return userService.validateToken(token).toString();
+    }
 
     @GetMapping("/products/publish")
     public ResponseEntity<String> sendProduct(@RequestParam("message") String msg){

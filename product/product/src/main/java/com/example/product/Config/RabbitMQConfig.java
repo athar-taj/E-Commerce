@@ -10,7 +10,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+@Configuration(value = "productRabbitMQConfig")
 public class RabbitMQConfig {
 
     @Value("${rabbitmq.queue.name}")
@@ -64,7 +64,7 @@ public class RabbitMQConfig {
     //RabbitTamplate
     //RabbitAdmin
 
-    @Bean
+    @Bean(name = "productJsonMessageConverter")
     public MessageConverter jsonMessageConverter() {
         Jackson2JsonMessageConverter converter = new Jackson2JsonMessageConverter();
 
@@ -185,15 +185,15 @@ public class RabbitMQConfig {
     private String userRoutingKey;
 
 
-    @Bean
+    @Bean(name = "userAvailableQueue")
     public Queue userQueue(){
         return new Queue(userQueue,true);
     }
-    @Bean
+    @Bean(name = "userAvailableExchange")
     public DirectExchange userExchange(){
         return new DirectExchange(userExchange,true,false);
     }
-    @Bean
+    @Bean(name = "userAvailableBinding")
     public Binding userBinding(){
         return BindingBuilder.bind(userQueue())
                 .to(userExchange())
